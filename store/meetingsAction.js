@@ -1,4 +1,5 @@
 import axios from '../config/axios'
+import realAxios from 'axios'
 import store from './store'
 export function fetchMeetings(payload) {
     console.log('????',store.getState());
@@ -51,3 +52,19 @@ export function setMeetingsToDefault() {
     return {type: 'SET_MEETINGS_DEFAULT'};
 };
 
+export function searchPlace(str){
+    console.log(`search this ${str}`);
+    return (dispatch) => {
+      dispatch({type: 'SEARCH_PLACE_LOADING'});
+      var arr = str.split(' ')
+      var result = arr.join('%20')
+      realAxios.get(`https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${result}&inputtype=textquery&fields=id,photos,formatted_address,geometry,name,opening_hours,rating&locationbias=circle:50000@-6.260679,106.781613&key=AIzaSyBa-c-SNhtue6ozeAQajtfmhhnYhrNlGMY`)
+        .then(({ data })=>{
+          console.log(`hasil search ${str}==>`, data);
+          dispatch({ type: 'SEARCH_PLACE_SUCCESS', payload: data.candidates })
+        })
+        .catch((err)=>{
+          dispatch({ type: 'SEARCH_PLACE_ERROR' })
+        })
+    }
+}

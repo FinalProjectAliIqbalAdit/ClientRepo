@@ -2,7 +2,10 @@ const initialState = {
     loading : false,
     error : null,
     meetings : [],
-    defaultMeetings: []
+    defaultMeetings: [],
+    searchLoading: false,
+    searchError: false,
+    searchResult: []
 }
 
 export default (state = initialState, { type, payload }) => {
@@ -29,7 +32,23 @@ export default (state = initialState, { type, payload }) => {
             loading: false,
             meetings: [...state.defaultMeetings]
         }
-
+    case 'SEARCH_PLACE_LOADING':
+      return {
+        ...state,
+        searchLoading: true
+      }
+    case 'SEARCH_PLACE_SUCCESS':
+      return {
+        ...state,
+        searchLoading: false,
+        searchResult: payload
+      }
+    case 'SEARCH_PLACE_ERROR':
+      return {
+        ...state,
+        searchLoading: false,
+        searchError: true
+      }
     default:
         return state
         

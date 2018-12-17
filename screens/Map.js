@@ -16,7 +16,7 @@ class Map extends Component {
         latitudeDelta: 0.002,
         longitudeDelta: 0.002,
         error : null,
-        participants : []
+        participants : {}
     };
 
     componentDidMount() {
