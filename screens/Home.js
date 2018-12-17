@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { ScrollView, View, Text, Image, StyleSheet, TextInput, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, Image, TextInput, ActivityIndicator } from 'react-native';
 import MeetingCard from '../components/MeetingCard';
 import styles from '../styles'
 import { connect } from 'react-redux'
-import { fetchMeetings } from "../store/meetingsAction";
+import { fetchUserMeetings, setMeetings, setMeetingsToDefault } from "../store/meetingsAction";
 import axios from '../config/axios'
 
 class Home extends Component {
@@ -17,7 +17,7 @@ class Home extends Component {
                         <Text style={{fontSize: 15, fontWeight: '500'}}>Meeting List</Text>
                     </View>
                     <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-end', paddingRight: 10, alignItems: 'center'}}>
-                        <TextInput style={styles.textInput} autoCapitalize="none" value={params.keyword} placeholder="Meeting Title" onChangeText={params.handleInputChange} />
+                        <TextInput style={styles.textInput} autoCapitalize="none" placeholder="Meeting Title" onChangeText={(e) => params.handleInputChange(e)} />
                         <Image
                             source={require('../assets/search.png')}
                         />
@@ -33,35 +33,29 @@ class Home extends Component {
     }
 
     componentDidMount() {
-        this.props.fetchMeetings()
+        this.props.fetchUserMeetings(this.props.user._id, this.props.user.token)
         
         this.props.navigation.setParams({
-            keyword: this.state.keyword,
-            handleInputChange: this.handleInputChange('keyword')
+            handleInputChange: (e) => this.searchMeeting(e)
         });
+    }
+
+    searchMeeting = (title) => {
+        const filteredMeetings = this.props.defaultMeetings.filter(meeting => {
+            const testCase = new RegExp(title, 'i');
+            const regexTest = testCase.test(meeting.title);
+            return regexTest;
+        });
+
+        if (title === '') {
+            this.props.setMeetingsToDefault();
+        } else {
+            this.props.setMeetings(filteredMeetings);
+        }
     }
 
     shouldComponentUpdate() {
         return true
-    }
-
-    state = {
-        keyword: '',
-    }
-
-    componentDidMount() {
-        this.props.fetchMeetings()
-        
-        this.props.navigation.setParams({
-            keyword: this.state.keyword,
-            handleInputChange: this.handleInputChange('keyword')
-        });
-    }
-
-    handleInputChange = val => (e) => {
-        this.setState({
-            [val]: e
-        });
     }
 
     showDetail = (title, meeting) => {
@@ -77,12 +71,13 @@ class Home extends Component {
     }
 
     render() {
-        const { meetings } = this.props
-        if(!meetings) return (<ActivityIndicator></ActivityIndicator>)
+        const { meetings, loading } = this.props
 
         return (
             <ScrollView style={styles.homeContainer}>
-                {meetings.map(meeting => <MeetingCard showDetail={this.showDetail} key={meeting._id} meeting={meeting} />)}
+                {loading ? <View style={styles.meetingsIndicator}>
+                    <ActivityIndicator size="large" color="#dd0752" />
+                </View> : meetings.map(meeting => <MeetingCard showDetail={this.showDetail} key={meeting._id} meeting={meeting} />)}
             </ScrollView>
         );
     }
@@ -92,13 +87,16 @@ const mapStateToProps = (state) => {
     return {
         loading : state.meetings.loading,
         meetings : state.meetings.meetings,
+        defaultMeetings: state.meetings.defaultMeetings,
         error : state.meetings.error,
         user: state.login.user
     }
 }
 
 const mapDispatchToProps = (dispatch) => ({
-    fetchMeetings: () => {dispatch(fetchMeetings())}
+    fetchUserMeetings: (userId, token) => dispatch(fetchUserMeetings(userId, token)),
+    setMeetings: (filteredMeetings) => dispatch(setMeetings(filteredMeetings)),
+    setMeetingsToDefault: () => dispatch(setMeetingsToDefault())
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home)

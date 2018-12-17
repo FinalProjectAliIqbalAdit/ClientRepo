@@ -3,11 +3,13 @@ import thunk from 'redux-thunk'
 
 import meetings from './meetingsReducer.js'
 import login from './loginReducer.js'
+import uninvitedUsers from './uninvitedUsersReducer.js'
 
 
 const rootReducers = combineReducers({
     login,
-    meetings
+    meetings,
+    uninvitedUsers
 })
 
 const logger = store => next => action => {

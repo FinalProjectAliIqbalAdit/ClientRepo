@@ -1,8 +1,6 @@
 import axios from '../config/axios'
-import { NavigationActions } from 'react-navigation';
 
-
-export default function(email, password, history) {
+export default function(email, password, props) {
 
     return (dispatch) => {
 
@@ -11,10 +9,14 @@ export default function(email, password, history) {
         axios.post('/login', {
             email,password
         })
-            .then((result) => {
-                dispatch({type : 'LOGIN_SUCCESS', payload : result.data.user})
+            .then(({ data }) => {
+                const user = {
+                    ...data.user, 
+                    token: data.token
+                }
+                dispatch({type : 'LOGIN_SUCCESS', payload : user})
                 console.log('bal',result.data)
-                NavigationActions.navigate('Meetings')
+                props.navigation.navigate('Home');
 
             })
             .catch((error) => {

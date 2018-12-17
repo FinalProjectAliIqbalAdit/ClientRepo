@@ -124,7 +124,7 @@ class Authentication extends Component {
                         </View>
                     </> :
                     <View>
-                        <LoginForm email={this.state.email} password={this.state.password} handleInputChange={this.handleInputChange} loginHandler={this.loginHandler}/>
+                        <LoginForm email={this.state.email} password={this.state.password} handleInputChange={this.handleInputChange} loginHandler={() => this.props.loginAction(this.state.email, this.state.password, this.props)}/>
                     </View>
                 }
             </View>
@@ -133,7 +133,7 @@ class Authentication extends Component {
 }
 const mapDispatchToProps = (dispatch) => {
   return {
-    loginAction: (email,password) => dispatch(loginAction(email,password))
+    loginAction: (email, password, props) => dispatch(loginAction(email, password, props))
   }
 }
 const mapStateToProps = (state) => {
