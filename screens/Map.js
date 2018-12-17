@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Platform,Text,View, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import axios from '../config/axios'
+import realAxios from 'axios'
 import db from '../config/firebase'
 import { PermissionsAndroid } from 'react-native';
 import moment from 'moment'
@@ -104,8 +105,14 @@ class Map extends Component {
             </View>
         );
     }
-
+   getEstimations(){
+    realAxios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${Number(this.state.mylatitude)},${Number(this.state.mylongitude)}&destinations=${Number(this.props.navigation.state.params.meeting.lat)},${Number(this.props.navigation.state.params.meeting.lng)}&mode=driving&language=id&key=AIzaSyBa-c-SNhtue6ozeAQajtfmhhnYhrNlGMY`,{})
+      .then(({ data })=>{
+        
+      })
+    }
     showParticipants() {
+        
         const {participants} = this.state;
         let participantsArr = Object.values(participants)
         return participantsArr.map(member => {
