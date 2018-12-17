@@ -35,7 +35,7 @@ const LoginForm = (props) => {
     return (
         <View style={styles.container}>
             <Text style={{marginBottom: 20, alignSelf: 'flex-start', fontWeight: '700', fontSize: 25}}>Log in</Text>
-            <TextInput style={styles.textInput} value={props.email} placeholder="Email" onChangeText={props.handleInputChange('email')} />
+            <TextInput style={styles.textInput} value={props.email} autoCapitalize="none" placeholder="Email" onChangeText={props.handleInputChange('email')} />
             <TextInput style={styles.textInput} secureTextEntry={true} value={props.password} placeholder="Password" onChangeText={props.handleInputChange('password')} />
             <TouchableOpacity 
               style={styles.topacity}

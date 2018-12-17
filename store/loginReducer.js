@@ -35,7 +35,6 @@ function login (state = defaultState, { type, payload }) {
         }
 
         case 'LOGOUT' : {
-            localStorage.clear()
             return {
                 ...state,
                 isLogin : false,

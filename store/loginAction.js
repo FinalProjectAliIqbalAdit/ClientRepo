@@ -13,7 +13,7 @@ export default function(email, password, history) {
         })
             .then((result) => {
                 dispatch({type : 'LOGIN_SUCCESS', payload : result.data.user})
-                console.log(result.data)
+                console.log('bal',result.data)
                 NavigationActions.navigate('Meetings')
 
             })
@@ -23,5 +23,9 @@ export default function(email, password, history) {
             });
 
     }
-
+}
+export function logout() {
+  return (dispatch) => {
+    dispatch({type : 'LOGOUT'})
+  }
 }
