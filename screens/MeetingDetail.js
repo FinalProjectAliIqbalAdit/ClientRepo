@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity,TextInput,Button } from 'react-native';
 import { connect } from 'react-redux';
 import axios from '../config/axios'
 import Searchbar from '../components/Searchbar';
+import { searchPlace } from '../store/meetingsAction';
 import { fetchUninvitedUsers, setUninvited, setUninvitedToDefault } from '../store/uninvitedUsersAction';
 
 const styles = StyleSheet.create({
@@ -67,6 +68,21 @@ class MeetingDetail extends Component {
                         <Text>Invite</Text>
                     </TouchableOpacity>
                 </View>)}
+
+                <Searchbar handleInputChange={(e) => this.props.searchPlace(e)} />
+                {this.props.searchResult.length !== 0 && this.props.searchResult.map(elem => <View key={elem.id}>
+                    <View>
+                        <Text style={{color: 'black'}}>{elem.name}</Text>
+                        <TextInput style={{color: 'grey'}} editable = {false}>{elem.formatted_address}</TextInput>
+                        <Button 
+                          title='getLatLng'
+                          onPress= {()=>{
+                            alert(`Ini lat : ${Number(elem.geometry.location.lat)}/n Ini lng : ${Number(elem.geometry.location.lng)}`)
+                          }}
+                        >Pick</Button>
+                    </View>
+                </View>)}
+                  
             </ScrollView>
         );
     }
@@ -76,7 +92,9 @@ const mapStateToProps = (state) => {
     return {
         token: state.login.user.token,
         uninvitedUsers: state.uninvitedUsers.uninvitedUsers,
-        defaultUninvited: state.uninvitedUsers.defaultUninvited
+        defaultUninvited: state.uninvitedUsers.defaultUninvited,
+        searchLoading: state.meetings.searchLoading,
+        searchResult : state.meetings.searchResult
     }
 }
 
@@ -84,7 +102,8 @@ const mapDispatchToProps = (dispatch) => {
     return  {
         fetchUninvitedUsers: (meetingId, token) => dispatch(fetchUninvitedUsers(meetingId, token)),
         setUninvitedToDefault: () => dispatch(setUninvitedToDefault()),
-        setUninvited: (filteredUsers) => dispatch(setUninvited(filteredUsers))
+        setUninvited: (filteredUsers) => dispatch(setUninvited(filteredUsers)),
+        searchPlace: (str)=> dispatch(searchPlace(str))
     }
 }
 

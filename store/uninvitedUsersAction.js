@@ -1,6 +1,9 @@
 import axios from '../config/axios';
 
 export function fetchUninvitedUsers(meetingId, token) {
+    console.log('ini meetingId:',meetingId);
+    console.log('ini token:',token);
+
     return (dispatch) => {
         dispatch({type: 'FETCH_UNINVITED_LOADING'});
         axios.get(`/meetings/userstoinvite/${meetingId}`, {headers: {
@@ -11,8 +14,8 @@ export function fetchUninvitedUsers(meetingId, token) {
                 dispatch({type: 'FETCH_UNINVITED_SUCCESS', payload: data});
             })
             .catch((err) => {
-                console.log('Get Uninvited Users Error: ', err);
-                dispatch({type: 'FETCH_UNINVITED_ERROR', payload: err.response.data.message});
+                console.log('Get Uninvited Users Error: ', err.response);
+                dispatch({type: 'FETCH_UNINVITED_ERROR', payload: err.response});
             });
     }
 }
