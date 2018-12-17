@@ -53,7 +53,7 @@ class ProfileView extends Component {
 
     asignToFirebasDatabase =  (meetingObj) => {
         let user = this.props.user
-        realAxios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${Number(user.lat)},${Number(user.lng)}&destinations=${Number(meetingObj.lat)},${Number(meetingObj.lng)}&mode=driving&language=id&key=AIzaSyBa-c-SNhtue6ozeAQajtfmhhnYhrNlGMY`)
+        realAxios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${Number(user.lat)},${Number(user.lng)}&destinations=${Number(meetingObj.lat)},${Number(meetingObj.lng)}&mode=driving&key=AIzaSyBa-c-SNhtue6ozeAQajtfmhhnYhrNlGMY`)
           .then(({ data })=>{
             db.ref(`meetings/${meetingObj.title}/${user.name}`).set({
               _id : user._id,

@@ -11,7 +11,7 @@ const MapNavigator = createMaterialTopTabNavigator({
     screen: MeetingDetailScreen
   }
 },{
-    initialRouteName: 'MeetingDetail'
+    initialRouteName: 'Map'
 })
 const MeetingNavigator = createStackNavigator({
     List: {

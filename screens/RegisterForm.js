@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image } from 'react-native';
+import axios from '../config/axios'
 
 const styles = StyleSheet.create({
     container: {
@@ -64,6 +65,19 @@ class RegisterForm extends Component {
         });
     }
 
+    submitRegister = () => {
+        let { name, email, password } = this.state
+        axios.post('/register', {
+            name, email, password
+        })
+        .then((result) => {
+            alert('Register Success')
+            this.props.navigation.navigate('Auth')
+        }).catch((err) => {
+            alert(JSON.stringify(err.response.data.message,null,2))
+        });
+    }
+
     render() {
         return (
             <View style={styles.container}>
@@ -71,7 +85,7 @@ class RegisterForm extends Component {
                 <TextInput style={styles.textInput} value={this.state.name} placeholder="Name" onChangeText={this.handleInputChange('name')} />
                 <TextInput style={styles.textInput} value={this.state.email} placeholder="Email" onChangeText={this.handleInputChange('email')} />
                 <TextInput style={styles.textInput} secureTextEntry={true} value={this.state.password} placeholder="Password" onChangeText={this.handleInputChange('password')} />
-                <TouchableOpacity style={styles.topacity}>
+                <TouchableOpacity style={styles.topacity} onPress={() => {this.submitRegister()}}>
                     <Text style={{color: 'white', fontWeight: '500', fontSize: 15}}>Register</Text>
                 </TouchableOpacity>
             </View>

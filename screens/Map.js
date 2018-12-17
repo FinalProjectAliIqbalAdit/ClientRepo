@@ -17,7 +17,9 @@ class Map extends Component {
         latitudeDelta: 0.002,
         longitudeDelta: 0.002,
         error : null,
-        participants : {}
+        participants : {},
+        duration: '',
+        distance: ''
     };
 
     componentDidMount() {
@@ -67,8 +69,12 @@ class Map extends Component {
     updatePositionToDB = (position) => {
         let meeting = this.props.navigation.state.params.meeting
         let user = this.props.navigation.state.params.user
-        realAxios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${Number(user.lat)},${Number(user.lng)}&destinations=${Number(meeting.lat)},${Number(meeting.lng)}&mode=driving&language=id&key=AIzaSyBa-c-SNhtue6ozeAQajtfmhhnYhrNlGMY`)
+        realAxios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${Number(position.coords.latitude)},${Number(position.coords.longitude)}&destinations=${Number(meeting.lat)},${Number(meeting.lng)}&mode=driving&key=AIzaSyBa-c-SNhtue6ozeAQajtfmhhnYhrNlGMY`)
           .then(({ data })=>{
+            this.setState({
+                duration: data.rows[0].elements[0].duration.text,
+                distance: data.rows[0].elements[0].distance.text
+            })
             db.ref(`meetings/${meeting.title}/${user.name}`).set({
               _id : user._id,
               name : user.name,
@@ -169,15 +175,20 @@ class Map extends Component {
                     />
 
                     {this.state.participants && Object.keys(this.state.participants).map(key => 
-                        <Marker 
-                        key={this.state.participants[key]._id} 
-                        title={this.state.participants[key].name} 
-                        coordinate={{
-                            latitude: Number(this.state.participants[key].lat),
-                            longitude: Number(this.state.participants[key].lng)
-                        }} 
-                        image={require('../assets/location.png')}
-                        />
+                        <Marker
+                            key={this.state.participants[key]._id} 
+                            coordinate={{
+                                latitude: Number(this.state.participants[key].lat),
+                                longitude: Number(this.state.participants[key].lng)
+                            }} 
+                            image={require('../assets/location.png')}
+                        >
+                            <MapView.Callout>
+                                <Text>{this.state.participants[key].name}</Text>
+                                <Text>Estimate Time : {this.state.duration}</Text>
+                                <Text>Distance : {this.state.distance}</Text>
+                            </MapView.Callout>    
+                        </Marker>
                     )}
                 
                 </MapView>
