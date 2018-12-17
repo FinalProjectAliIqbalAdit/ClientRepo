@@ -26,11 +26,10 @@ class Meetings extends Component {
       if(this.props.loading){
         return(
           <View style={{flex: 1, padding: 20}}>
-            <ActivityIndicator/>
+            <ActivityIndicator size="large" color="#0000ff" />
           </View>
         )
       }
-  
       return(
         <View style={{flex: 1}}>
           <FlatList

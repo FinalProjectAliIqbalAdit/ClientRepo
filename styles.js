@@ -101,5 +101,42 @@ export default styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         height: 40
-    }
+    },
+    textInput: {
+        height: 40,
+        borderColor: '#ead7aa',
+        width: 110
+    },
+    outerContainer: {
+        flex: 1,
+        borderBottomWidth: 1,
+        marginHorizontal: 20,
+        borderColor: '#e5e4e2',
+        flexDirection: 'row'
+    },
+    firstContainer: {
+        flex: 7,
+        paddingVertical: 18,
+        paddingRight: 10
+    },
+    statusContainer: {
+        flex: 3, 
+        paddingVertical: 18,
+        alignItems: 'center', 
+    },
+    title: {
+        fontSize: 18,
+        fontWeight: '500',
+        marginBottom: 6
+    },
+    description: {
+        marginBottom: 20
+    },
+    homeContainer: {
+        flex: 1
+    },
+    homeViewHeader: {
+        flex: 1,
+        flexDirection: 'row'
+    },
 });

@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import styles from '../styles'
 
 import loginAction from '../store/loginAction'
-
+import fetchMeetings from '../store/meetingsAction'
 
 export class Login extends Component {
     state = {
@@ -29,7 +29,7 @@ export class Login extends Component {
 
         const { email, password } = this.state
         this.props.login(email, password)
-
+        this.props.fetchMeetings()
         this.setState({
             email : '',
             password : ''
@@ -76,6 +76,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
     login: (email,password) => dispatch(loginAction(email,password)),
+    fetchMeetings: () => dispatch(fetchMeetings())
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login)
