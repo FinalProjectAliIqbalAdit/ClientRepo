@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableHighlight } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import styles from '../styles'
 import moment from 'moment'
 import axios from 'axios'
@@ -18,22 +18,22 @@ const MeetingCard = (props) => {
             </View>
             <View style={styles.statusContainer}>
                 {props.meeting.status === 'upcoming' ? 
-                    <TouchableHighlight onPress={() => props.showDetail(props.meeting.title, props.meeting)}>
+                    <TouchableOpacity onPress={() => props.showDetail(props.meeting.title, props.meeting)}>
                         <>
                             <View style={{borderRadius: 20, backgroundColor: '#3399ff', width: 90, alignItems: 'center', height: 30, justifyContent: 'center', marginBottom: 20}}>
                                 <Text style={{color: 'white', fontWeight: '600'}}>{props.meeting.status}</Text>
                             </View>
                             <Text style={{fontWeight: '900'}}>At {moment(props.meeting.startAt).format("HH:mm A")}</Text>
                         </>
-                    </TouchableHighlight> : 
-                    <TouchableHighlight>
+                    </TouchableOpacity> : 
+                    <TouchableOpacity>
                         <>
                             <View style={{borderRadius: 50, backgroundColor: '#f40059', width: 90, alignItems: 'center', height: 30, justifyContent: 'center', marginBottom: 20}}>
                                 <Text style={{color: 'white', fontWeight: '600'}}>{props.meeting.status}</Text>
                             </View>
                             <Text style={{fontWeight: '900'}}>At {moment(props.meeting.startAt).format("HH:mm A")}</Text>
                         </>
-                    </TouchableHighlight>
+                    </TouchableOpacity>
                 }
             </View>
         </View>

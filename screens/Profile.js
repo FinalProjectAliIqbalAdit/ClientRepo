@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, Image, TouchableOpacity, ActivityIndicator, Scr
 import { connect } from 'react-redux'
 import { logout } from '../store/loginAction'
 import axios from '../config/axios'
+import realAxios from 'axios'
 import {fetchMeetings} from '../store/meetingsAction'
 import db from '../config/firebase.js'
 
@@ -50,16 +51,24 @@ class ProfileView extends Component {
         });
     }
 
-    asignToFirebasDatabase = (meetingObj) => {
+    asignToFirebasDatabase =  (meetingObj) => {
         let user = this.props.user
-        db.ref(`meetings/${meetingObj.title}/${user.name}`).set({
-            _id : user._id,
-            name : user.name,
-            lat : user.lat,
-            lng : user.lng,
-        }).then((data)=>{
-            // alert(JSON.stringify(data.val(),null,2))
-        }).catch((error)=>{
+        realAxios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${Number(user.lat)},${Number(user.lng)}&destinations=${Number(meetingObj.lat)},${Number(meetingObj.lng)}&mode=driving&language=id&key=AIzaSyBa-c-SNhtue6ozeAQajtfmhhnYhrNlGMY`)
+          .then(({ data })=>{
+            db.ref(`meetings/${meetingObj.title}/${user.name}`).set({
+              _id : user._id,
+              name : user.name,
+              lat : user.lat,
+              lng : user.lng,
+              duration: data.rows[0].elements[0].duration.text,
+              distance: data.rows[0].elements[0].distance.text
+
+            })
+            .then(()=>{
+                
+            })
+          })
+        .catch((error)=>{
             alert(JSON.stringify(error,null,2))
         })
     }

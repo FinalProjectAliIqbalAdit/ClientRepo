@@ -67,14 +67,19 @@ class Map extends Component {
     updatePositionToDB = (position) => {
         let meeting = this.props.navigation.state.params.meeting
         let user = this.props.navigation.state.params.user
-        db.ref(`meetings/${meeting.title}/${user.name}`).set({
-            _id : user._id,
-            name : user.name,
-            lat : position.coords.latitude,
-            lng : position.coords.longitude,
-        }).then((data)=>{
-            // alert(JSON.stringify(data.val(),null,2))
-        }).catch((error)=>{
+        realAxios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${Number(user.lat)},${Number(user.lng)}&destinations=${Number(meeting.lat)},${Number(meeting.lng)}&mode=driving&language=id&key=AIzaSyBa-c-SNhtue6ozeAQajtfmhhnYhrNlGMY`)
+          .then(({ data })=>{
+            db.ref(`meetings/${meeting.title}/${user.name}`).set({
+              _id : user._id,
+              name : user.name,
+              lat : position.coords.latitude,
+              lng : position.coords.longitude,
+              duration: data.rows[0].elements[0].duration.text,
+              distance: data.rows[0].elements[0].distance.text
+            })
+            .then(()=>{})
+          })
+        .catch((error)=>{
             // alert(JSON.stringify(error,null,2))
         })
     }
@@ -104,12 +109,6 @@ class Map extends Component {
                 </TouchableOpacity>
             </View>
         );
-    }
-   getEstimations(){
-    realAxios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${Number(this.state.mylatitude)},${Number(this.state.mylongitude)}&destinations=${Number(this.props.navigation.state.params.meeting.lat)},${Number(this.props.navigation.state.params.meeting.lng)}&mode=driving&language=id&key=AIzaSyBa-c-SNhtue6ozeAQajtfmhhnYhrNlGMY`,{})
-      .then(({ data })=>{
-        
-      })
     }
     showParticipants() {
         
