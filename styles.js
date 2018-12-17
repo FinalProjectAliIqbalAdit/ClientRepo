@@ -139,4 +139,9 @@ export default styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row'
     },
+    meetingsIndicator: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
+    }
 });

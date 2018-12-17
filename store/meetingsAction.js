@@ -27,3 +27,27 @@ export function fetchMeetings(payload) {
   
 }
 
+export function fetchUserMeetings(userId, token) {
+    return (dispatch) => {
+        dispatch({type: 'FETCH_MEETINGS_CALL'});
+        axios.get(`/users/${userId}`, {headers: {
+            token: token
+        }})
+            .then(({ data }) => {
+                dispatch({type: 'FETCH_MEETINGS_COMPLETE', payload: data.userMeetings});
+            })
+            .catch((err) => {
+                console.log('Fetch Meetings Error: ', err);
+                dispatch({type: 'FETCH_MEETINGS_ERROR', payload: err.response.data.message});
+            });
+    } 
+}
+
+export function setMeetings(filteredMeetings) {
+    return {type: 'SET_MEETINGS', payload: filteredMeetings};
+};
+
+export function setMeetingsToDefault() {
+    return {type: 'SET_MEETINGS_DEFAULT'};
+};
+
