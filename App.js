@@ -14,28 +14,6 @@ import RegisterForm from './screens/RegisterForm';
 import HomeNavigator from './navigators/HomeNavigator';
 console.disableYellowBox = true;
 
-// const MapStack = createStackNavigator({
-//     Map: {screen: Map}
-// },{
-//     initialRouteName: "Map"
-// })
-
-// const MeetingsStack = createStackNavigator({
-//     Auth: { screen: Authentication },
-//     Register: { screen: RegisterForm },
-//     Meetings: { screen: Meetings},
-//     MeetingDetail: { screen: MeetingDetail },
-//     Map: {screen: Map}
-// },{
-//     initialRouteName: "Auth"
-// })
-    
-// const AppNavigator = createBottomTabNavigator({
-//     Meetings: {screen: MeetingsStack},
-//     Map: {screen: MapStack}
-// },{
-//     initialRouteName: "Meetings",
-// });
 
 const AppNavigator = createStackNavigator({
     Auth: {
@@ -67,21 +45,3 @@ class App extends React.Component {
 }
 
 export default App;
-
-// const AppContainer = createAppContainer(AppNavigator);
-
-// export default class App extends React.Component {
-
-//     componentDidMount() {
-
-//     }
-
-//     render() {
-
-//         return (
-//             <Provider store={store}>
-//                 <AppContainer />
-//             </Provider>
-//         )
-//     }
-// }
