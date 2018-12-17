@@ -23,11 +23,16 @@ const styles = StyleSheet.create({
         width: 200,
         backgroundColor: '#435562'
     },
-    lat: '',
-    lng: ''  
+     
 });
 
 class MeetingDetail extends Component {
+
+    state = {
+        lat: '',
+        lng: ''
+    }
+
     inviteUser(userId, meetingId, token) {
         axios.get(`/meetings/invite/${meetingId}/${userId}`, {headers: {
             token: token

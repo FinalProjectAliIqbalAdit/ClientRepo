@@ -1,0 +1,4 @@
+#Mon Dec 17 16:56:09 WIB 2018
+base.0=/home/adishare/Documents/Phase3/FinalProject/Client/android/app/build/intermediates/transforms/dexMerger/debug/0
+path.0=classes.dex
+renamed.0=classes.dex

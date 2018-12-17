@@ -2,30 +2,32 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
 import { connect } from 'react-redux'
 import { logout } from '../store/loginAction'
-
-// _id: "5c14964d8562ec29092d7517",
-// name: "adit",
-// email: "adit@mail.com",
-// avatar: "",
-// lat: "-6.1753924",
-// lng: "106.8249641",
-// score: 100,
-// userMeetings: [{
-//     "_id": "5c14a5af268d263a62a681d0",
-//     "title": "Go Meeting",
-//     "description": "Hows life Panjang Bnaget ini descripsinya harus sampe enter woiaskldjaskl dklasjd klas jdklasd jlaskd jaskld j",
-//     "participants": ['5c12370715da6b39635d7039'],
-//     "host": '5c12370715da6b39635d7039',
-//     "lat": "-6.132055",
-//     "lng": "106.871483",
-//     "status": "upcoming",
-//     "startAt": "2018-12-18T00:00:00.000Z",
-//     "createdAt": "2018-12-15T06:56:47.940Z",
-//     "updatedAt": "2018-12-15T06:56:47.940Z"
-// }],
-// meetingInvitation: ['5c123a57268d263a62a681ca']
+import axios from '../config/axios'
+import {fetchMeetings} from '../store/meetingsAction'
+import db from '../config/firebase.js'
 
 class ProfileView extends Component {
+
+    state = {
+        user : null,
+        loading : true
+    }
+
+    fetchUser = (userId, token) => {
+        axios.get(`/users/${userId}`, {
+            headers : {
+                token : token
+            }
+        })
+        .then((result) => {
+            this.setState({
+                user : result.data,
+                loading : false
+            })
+        }).catch((err) => {
+            alert(JSON.stringify(err.response,null,2))
+        });
+    }
 
     logoutHandler() {
         const { logout , navigation } = this.props
@@ -33,30 +35,49 @@ class ProfileView extends Component {
         logout()
     }
 
+    acceptInvitation = (meetingObj) => {
+        axios.get(`/meetings/accept/${meetingObj._id}`, {
+            headers : {
+                token : this.props.token
+            }
+        })
+        .then((result) => {
+            this.fetchUser(this.props.user._id, this.props.token)
+            this.props.fetchMeetings()
+            this.asignToFirebasDatabase(meetingObj)
+        }).catch((err) => {
+            alert(JSON.stringify(err.response,null,2))            
+        });
+    }
+
+    asignToFirebasDatabase = (meetingObj) => {
+        let user = this.props.user
+        db.ref(`meetings/${meetingObj.title}/${user.name}`).set({
+            _id : user._id,
+            name : user.name,
+            lat : user.lat,
+            lng : user.lng,
+        }).then((data)=>{
+            // alert(JSON.stringify(data.val(),null,2))
+        }).catch((error)=>{
+            alert(JSON.stringify(error,null,2))
+        })
+    }
+
     render() {
-        const { user } = this.props
+        const { user, token } = this.props
 
         if(!user) return (<ActivityIndicator></ActivityIndicator>)
+        else if(this.state.loading) {
+            this.fetchUser(user._id, token)
+            return (<ActivityIndicator></ActivityIndicator>)
+        }
 
         return (
             <View style={styles.container}>
                 <View style={styles.header}>
                     <View style={styles.headerContent}>
                         <Image style={styles.avatar} source={{uri: 'https://bootdey.com/img/Content/avatar/avatar2.png'}}/>
-                        <Text style={styles.name}>
-                            {user.name}
-                        </Text>
-                    </View>
-                </View>
-
-                <View style={styles.profileDetail}>
-                    <View style={styles.detailContent}>
-                        <Text style={styles.title}>Score</Text>
-                        <Text style={styles.count}>{user.score}</Text>
-                    </View>
-                    <View style={styles.detailContent}>
-                        <Text style={styles.title}>Meetings</Text>
-                        <Text style={styles.count}>{user.userMeetings.length}</Text>
                     </View>
                 </View>
 
@@ -68,7 +89,7 @@ class ProfileView extends Component {
                                 <Image style={styles.icon} source={{uri: 'https://png.icons8.com/user/ultraviolet/50/3498db'}}/>
                             </View>
                             <View style={styles.infoContent}>
-                                <Text style={styles.info}>{user.name}</Text>
+                                <Text style={styles.info}>{this.state.user.name}</Text>
                             </View>
                         </View>
                         <View style={styles.item}>
@@ -79,9 +100,31 @@ class ProfileView extends Component {
                                 <Text style={styles.info}>{user.email}</Text>
                             </View>
                         </View>
+                        <View style={styles.item}>
+                            <View style={styles.iconContent}>
+                                <Image style={styles.icon} source={{uri: 'https://png.icons8.com/edit-file/color/40'}}/>
+                            </View>
+                            <View style={styles.infoContent}>
+                                <Text style={styles.info}>Score {user.score} / {user.userMeetings.length} Meetings </Text>
+                            </View>
+                        </View>
 
+                        <Text style={{fontSize:20, margin : 25}}>You have {this.state.user.meetingInvitation.length} Meeting Invitation</Text>
 
-                        <TouchableOpacity style={styles.buttonContainer} onPress={ () => this.logoutHandler()}>
+                        {this.state.user.meetingInvitation.map((meetingInvite,i) => {
+                            return (
+                                <View  style={styles.box}>
+                                    <Text style={{padding : 15, fontSize: 18}} >{meetingInvite.title}</Text>
+                                    <TouchableOpacity onPress={() => this.acceptInvitation(meetingInvite) }>
+                                        <View style={styles.iconContent2}>
+                                            <Image style={styles.icon} source={{uri: "https://png.icons8.com/ok/androidL/30/ffffff"}}/>
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+                            )
+                        })}
+
+                        <TouchableOpacity style={[styles.buttonContainer, {marginTop: 30}]} onPress={ () => this.logoutHandler()}>
                             <Text style={{color : 'white'}}>Logout</Text>  
                         </TouchableOpacity> 
                     </View>
@@ -94,28 +137,52 @@ class ProfileView extends Component {
 
 const mapStateToProps = (state) => {
     return {
-        user: state.login.user
+        user: state.login.user,
+        token : state.login.user.token
     }
 }
 
 const mapDispatchToProps = (dispatch) => ({
-    logout: () => {dispatch(logout())}
+    logout: () => {dispatch(logout())},
+    fetchMeetings: () => {dispatch(fetchMeetings())}
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProfileView)
   
 // --------------------------------------------
 const styles = StyleSheet.create({
+    box: {
+        justifyContent : 'space-between',
+        marginTop:5,
+        marginBottom:5,
+        backgroundColor: '#FFFFFF',
+        flexDirection: 'row',
+        shadowColor: 'black',
+        shadowOpacity: .2,
+        shadowOffset: {
+          height:1,
+          width:-2
+        },
+        elevation:2,
+        width: 300
+      },
     item:{
         flexDirection : 'row',
-        marginBottom : 30,
-        marginTop: 30
+        marginBottom : 10,
+        marginTop: 10
     },
     iconContent:{
         flex:1,
         alignItems:'flex-start',
         // paddingRight:5,
         paddingLeft:50
+    },
+    iconContent2:{
+        width: 60,
+        height: 60,
+        backgroundColor: '#183133',
+        marginLeft: 'auto',
+        alignItems: 'center'
     },
     icon:{
         width:30,
@@ -136,7 +203,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#183133",
     },
     headerContent:{
-        padding:20,
+        padding:10,
         alignItems: 'center',
     },
     avatar: {
@@ -145,7 +212,7 @@ const styles = StyleSheet.create({
         borderRadius: 63,
         borderWidth: 4,
         borderColor: "white",
-        marginBottom:10,
+        // marginBottom:10,
     },
     name:{
         fontSize:22,
@@ -174,8 +241,8 @@ const styles = StyleSheet.create({
     bodyContent: {
         flex: 1,
         alignItems: 'center',
-        padding:30,
-        marginTop:40,
+        padding:10,
+        marginTop:5,
         marginBottom:120
     },
     textInfo:{
@@ -201,3 +268,4 @@ const styles = StyleSheet.create({
         textAlign: 'center'
     },
 });
+ 

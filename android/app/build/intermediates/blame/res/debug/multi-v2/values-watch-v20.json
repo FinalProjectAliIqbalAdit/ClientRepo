@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "/home/adishare/Documents/Phase3/FinalProject/Client/android/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values-watch-v20/values-watch-v20.xml",
+            "map": [
+                {
+                    "source": "/home/adishare/.gradle/caches/transforms-1/files-1.1/appcompat-v7-27.1.1.aar/4020ed7911a8b709b61c6875fa74129b/res/values-watch-v20/values-watch-v20.xml",
+                    "from": {
+                        "startLines": "2,5,8",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,214,385",
+                        "endLines": "4,7,10",
+                        "endColumns": "12,12,12",
+                        "endOffsets": "209,380,553"
+                    }
+                }
+            ]
+        }
+    ]
+}
