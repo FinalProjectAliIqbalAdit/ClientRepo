@@ -22,7 +22,9 @@ const styles = StyleSheet.create({
     nameView: {
         width: 200,
         backgroundColor: '#435562'
-    }
+    },
+    lat: '',
+    lng: ''  
 });
 
 class MeetingDetail extends Component {
@@ -77,6 +79,10 @@ class MeetingDetail extends Component {
                         <Button 
                           title='getLatLng'
                           onPress= {()=>{
+                            this.setState({
+                              lat: elem.geometry.location.lat,
+                              lng: elem.geometry.location.lng
+                            })
                             alert(`Ini lat : ${Number(elem.geometry.location.lat)}/n Ini lng : ${Number(elem.geometry.location.lng)}`)
                           }}
                         >Pick</Button>
