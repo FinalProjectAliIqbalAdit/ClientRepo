@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ListView, Image, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ListView, ActivityIndicator } from 'react-native';
 import { connect } from 'react-redux';
 import axios from '../config/axios'
 import { searchPlace } from '../store/meetingsAction';
@@ -21,6 +21,7 @@ class MeetingDetail extends Component {
     } 
 
     componentDidMount() {
+        this.props.fetchMeetingDetail(this.props.navigation.state.params.meeting._id)
         this.props.fetchUninvitedUsers(this.props.navigation.state.params.meeting._id, this.props.token);
         axios.get(`/meetings/${this.props.navigation.state.params.meeting._id}`)
         .then(({data}) => {

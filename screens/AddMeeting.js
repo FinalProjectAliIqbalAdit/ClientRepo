@@ -121,6 +121,7 @@ class AddMeeting extends Component {
     }
 
     addMeeting = () => { 
+        console.log('masuk');
         axios.post(`/meetings`, {
             title: this.state.title,
             description: this.state.description,
@@ -130,6 +131,7 @@ class AddMeeting extends Component {
             startAt: this.state.startAt
         },{headers: {token: this.props.token}})
             .then(() => {
+                console.log('hrusnya kebuat');
                 realAxios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${Number(this.props.user.lat)},${Number(this.props.user.lng)}&destinations=${Number(this.state.lat)},${Number(this.state.lng)}&mode=driving&key=AIzaSyBa-c-SNhtue6ozeAQajtfmhhnYhrNlGMY`)
                 .then(({ data })=>{
                   db.ref(`meetings/${this.state.title}/${this.props.user.name}`).set({
@@ -221,7 +223,7 @@ class AddMeeting extends Component {
                     />
                 </View>
     
-                <TouchableOpacity style={[styles.buttonContainer, styles.createButton]} onPress={this.addMeeting}>
+                <TouchableOpacity style={[styles.buttonContainer, styles.createButton]} onPress={()=> this.addMeeting()}>
                     <Text style={styles.btnText}>Create Meeting</Text>
                 </TouchableOpacity>
           </View>
