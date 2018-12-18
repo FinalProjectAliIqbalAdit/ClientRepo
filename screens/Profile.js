@@ -58,8 +58,8 @@ class ProfileView extends Component {
             db.ref(`meetings/${meetingObj.title}/${user.name}`).set({
               _id : user._id,
               name : user.name,
-              lat : user.lat,
-              lng : user.lng,
+              lat : Number(user.lat),
+              lng : Number(user.lng),
               duration: data.rows[0].elements[0].duration.text,
               distance: data.rows[0].elements[0].distance.text
 
