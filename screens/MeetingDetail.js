@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity,TextInput,Button, ListView, Image, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ListView, Image, ActivityIndicator } from 'react-native';
 import { connect } from 'react-redux';
 import axios from '../config/axios'
-import Searchbar from '../components/Searchbar';
 import { searchPlace } from '../store/meetingsAction';
+import { fetchMeetingDetail } from '../store/detailMeetingAction';
 import { fetchUninvitedUsers, setUninvited, setUninvitedToDefault } from '../store/uninvitedUsersAction';
 import db from '../config/firebase.js'
 
@@ -99,17 +99,78 @@ class MeetingDetail extends Component {
 
     render() {
         let scores = [20,40,60,80,100]
+        
+        const startAt = new Date(this.props.meeting.startAt);
+        const date = new Date(this.props.meeting.startAt).toDateString();
+        let realHour = startAt.getHours();
+        let realMinute = startAt.getMinutes();
+
+        if (realHour < 10) {
+            realHour = '0' + realHour;
+        }
+
+        if (realMinute < 10) {
+            realMinute = '0' + realMinute;
+        }
+
         return (
             <ScrollView style={styles.container}>
-                <Searchbar handleInputChange={(e) => this.searchUninvited(e)} />
-                {this.props.uninvitedUsers.map(user => <View style={styles.userView} key={user._id}>
-                    <View style={styles.nameView}>
-                        <Text style={{color: 'white', fontSize: 20}}>{user.name}</Text>
+                {this.props.loading ? <View style={styles.indicator}>
+                        <ActivityIndicator size="large" color="#dd0752" />
+                    </View> : 
+                    <View style={{flex: 1, paddingHorizontal: 20, marginBottom: 20}}>
+                        <View style={{flexDirection: 'column', marginBottom: 20}}>
+                            <Text style={{fontSize: 30, fontWeight: '700', marginBottom: 5}}>{this.props.meeting.title}</Text>
+                            <Text>{this.props.meeting.description}</Text>
+                        </View>
+                        <View style={{flexDirection: 'row', marginBottom: 20}}>
+                            <View style={{flexDirection: 'column', flex: 1, alignItems: 'flex-start', justifyContent: 'flex-start'}}>
+                                <Text style={{fontWeight: '700', marginBottom: 5}}>Time</Text>
+                                <View style={{flexDirection: 'row'}}>
+                                    <Text style={{marginRight: 5}}>{date}</Text>
+                                    <Text style={{fontWeight: '700', marginRight: 5}}>at</Text>
+                                    <Text>{realHour}:{realMinute}</Text>
+                                </View>
+                            </View>
+                        </View>
+                        <View style={{flexDirection: 'row', marginBottom: 20}}>
+                            <View style={{flexDirection: 'column', flex: 2, alignItems: 'flex-start', justifyContent: 'flex-start'}}>
+                                <Text style={{fontWeight: '700', marginBottom: 5}}>Place</Text>
+                                <Text>{this.props.meeting.place}</Text>
+                            </View>
+                            <View style={{flexDirection: 'column', flex: 1, justifyContent: 'flex-start', alignItems: 'flex-start'}}>
+                                <Text style={{fontWeight: '700', marginBottom: 5}}>Participants</Text>
+                                {this.props.meeting.participants.map(party => <Text style={{marginBottom: 5}} key={party.name}>
+                                {party.name}
+                                </Text>)}
+                            </View>
+                        </View>
+                        <View style={{flexDirection: 'column'}}>
+                            <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10}}>
+                                <View style={{flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
+                                    <Text style={{fontWeight: '700'}}>Invite People</Text>
+                                </View>
+                                <View style={styles.searchContainer}>
+                                    <TextInput style={styles.searchInput} autoCapitalize="none" placeholder="Name" onChangeText={(e) => this.searchUninvited(e)} />
+                                    <Image
+                                        style={{width: 30, height: 30, justifyContent: 'center'}}
+                                        source={{uri: 'https://img.icons8.com/color/50/000000/find-user-female.png'}}
+                                    />
+                                </View>
+                            </View>
+                            <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center'}}>
+                                {this.props.uninvitedUsers.map(user => <View style={styles.userView} key={user._id}>
+                                    <View style={styles.nameView}>
+                                        <Text style={{color: 'white', fontSize: 17, fontWeight: '600'}}>{user.name}</Text>
+                                    </View>
+                                    <TouchableOpacity style={styles.topacity} onPress={() => this.inviteUser(user._id, this.props.navigation.state.params.meeting._id, this.props.token)}>
+                                        <Text style={{color: 'white', fontSize: 17, fontWeight: '600'}}>Invite</Text>
+                                    </TouchableOpacity>
+                                </View>)}
+                            </View>
+                        </View>
                     </View>
-                    <TouchableOpacity style={styles.topacity} onPress={() => this.inviteUser(user._id, this.props.navigation.state.params.meeting._id, this.props.token)}>
-                        <Text style={{fontSize: 30, padding: 10}}>+</Text>
-                    </TouchableOpacity>
-                </View>)}
+                }
 
                 { this.state.populateLoading ? <ActivityIndicator></ActivityIndicator> : (<ListView 
                     enableEmptySections={true}
@@ -149,7 +210,9 @@ const mapStateToProps = (state) => {
         uninvitedUsers: state.uninvitedUsers.uninvitedUsers,
         defaultUninvited: state.uninvitedUsers.defaultUninvited,
         searchLoading: state.meetings.searchLoading,
-        searchResult : state.meetings.searchResult
+        searchResult : state.meetings.searchResult,
+        meeting: state.detailMeeting.meeting,
+        detailLoading: state.detailMeeting.loading
     }
 }
 
@@ -158,28 +221,54 @@ const mapDispatchToProps = (dispatch) => {
         fetchUninvitedUsers: (meetingId, token) => dispatch(fetchUninvitedUsers(meetingId, token)),
         setUninvitedToDefault: () => dispatch(setUninvitedToDefault()),
         setUninvited: (filteredUsers) => dispatch(setUninvited(filteredUsers)),
-        searchPlace: (str)=> dispatch(searchPlace(str))
+        searchPlace: (str) => dispatch(searchPlace(str)),
+        fetchMeetingDetail: (meetingId) => dispatch(fetchMeetingDetail(meetingId))
     }
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingVertical: 30,
+        paddingVertical: 10,
     },
     userView: {
         flexDirection: 'row',
-        alignSelf : 'center'
+        marginBottom: 10,
+        height: 50
     },
     topacity: {
-        width: 50,
-        height: 50,
-        backgroundColor: '#ff0074'
+        flex: 1,
+        backgroundColor: '#f20a44',
+        flexDirection: 'row', 
+        justifyContent: 'center', 
+        alignItems: 'center'
     },
     nameView: {
-        width: 240,
-        padding: 10,
-        backgroundColor: '#435562'
+        width: 200,
+        flex: 3,
+        backgroundColor: '#003d4f',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start', 
+        paddingHorizontal: 20
+    },
+    indicator: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center', 
+        marginTop: 250
+    },
+    searchContainer: {
+        flex: 1, 
+        flexDirection: 'row', 
+        justifyContent: 'flex-end', 
+        paddingRight: 10, 
+        alignItems: 'center'
+    },
+    searchInput: {
+        height: 40,
+        borderColor: '#ead7aa',
+        width: 100
     },
     image: {
         width: 60,
