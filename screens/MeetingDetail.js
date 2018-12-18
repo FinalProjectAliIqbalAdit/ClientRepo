@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ListView, Image, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ListView, ActivityIndicator } from 'react-native';
 import { connect } from 'react-redux';
 import axios from '../config/axios'
 import { searchPlace } from '../store/meetingsAction';
