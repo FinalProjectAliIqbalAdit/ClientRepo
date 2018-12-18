@@ -91,7 +91,7 @@ class MeetingDetail extends Component {
             return db.ref(`meetings/${this.props.navigation.state.params.meeting.title}`).remove()
         })
         .then(() => {
-            this.props.navigation.navigate('Home')
+            this.props.navigation.navigate('List')
         }).catch((err) => {
             alert(JSON.stringify(err,null,2))
         });
