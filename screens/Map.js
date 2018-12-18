@@ -71,8 +71,8 @@ class Map extends Component {
             db.ref(`meetings/${meeting.title}/${user.name}`).set({
               _id : user._id,
               name : user.name,
-              lat : position.coords.latitude,
-              lng : position.coords.longitude,
+              lat : Number(position.coords.latitude),
+              lng : Number(position.coords.longitude),
               duration: data.rows[0].elements[0].duration.text,
               distance: data.rows[0].elements[0].distance.text
             })
