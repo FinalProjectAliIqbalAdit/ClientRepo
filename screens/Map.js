@@ -17,9 +17,7 @@ class Map extends Component {
         latitudeDelta: 0.002,
         longitudeDelta: 0.002,
         error : null,
-        participants : {},
-        duration: '',
-        distance: ''
+        participants : {}
     };
 
     componentDidMount() {
@@ -35,7 +33,6 @@ class Map extends Component {
                     region : obj
                 })
             }, 
-            
             {enableHighAccuracy : false, timeout: 50000, maximumAge: 10000, distanceFilter: 10 }
         )
 
@@ -71,10 +68,6 @@ class Map extends Component {
         let user = this.props.navigation.state.params.user
         realAxios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${Number(position.coords.latitude)},${Number(position.coords.longitude)}&destinations=${Number(meeting.lat)},${Number(meeting.lng)}&mode=driving&key=AIzaSyBa-c-SNhtue6ozeAQajtfmhhnYhrNlGMY`)
           .then(({ data })=>{
-            this.setState({
-                duration: data.rows[0].elements[0].duration.text,
-                distance: data.rows[0].elements[0].distance.text
-            })
             db.ref(`meetings/${meeting.title}/${user.name}`).set({
               _id : user._id,
               name : user.name,
@@ -185,8 +178,8 @@ class Map extends Component {
                         >
                             <MapView.Callout>
                                 <Text>{this.state.participants[key].name}</Text>
-                                <Text>Estimate Time : {this.state.duration}</Text>
-                                <Text>Distance : {this.state.distance}</Text>
+                                <Text>Estimate Time : {this.state.participants[key].duration}</Text>
+                                <Text>Distance : {this.state.participants[key].distance}</Text>
                             </MapView.Callout>    
                         </Marker>
                     )}

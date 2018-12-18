@@ -1,8 +1,9 @@
+import React from 'react'
 import { createBottomTabNavigator, createAppContainer } from 'react-navigation';
 import Profile from '../screens/Profile';
 import MeetingNavigator from './MeetingNavigator';
 import AddNavigator from './AddNavigator';
-
+import { Image } from 'react-native';
 const HomeNavigator = createBottomTabNavigator({
     Meetings: {
         screen: MeetingNavigator,
@@ -39,7 +40,7 @@ const HomeNavigator = createBottomTabNavigator({
     tabBarOptions: {
         activeTintColor: '#ffa500',
         inactiveTintColor: 'white',
-        // showLabel: false,
+        showLabel: false,
         labelStyle: {
             fontSize: 20,
             flex: 3

@@ -77,7 +77,7 @@ class Home extends Component {
             <ScrollView style={styles.homeContainer}>
                 {loading ? <View style={styles.meetingsIndicator}>
                     <ActivityIndicator size="large" color="#dd0752" />
-                </View> : meetings.map(meeting => <MeetingCard showDetail={this.showDetail} key={meeting._id} meeting={meeting} />)}
+                </View> : meetings.map(meeting => <MeetingCard showDetail={this.showDetail} key={meeting._id} meeting={meeting} username={this.props.user.name} />)}
             </ScrollView>
         );
     }

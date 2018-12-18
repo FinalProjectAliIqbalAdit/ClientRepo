@@ -10,11 +10,9 @@ export function fetchUninvitedUsers(meetingId, token) {
             token: token
         }})
             .then(({ data }) => {
-                console.log('uninvited users: ', data);
                 dispatch({type: 'FETCH_UNINVITED_SUCCESS', payload: data});
             })
             .catch((err) => {
-                console.log('Get Uninvited Users Error: ', err.response);
                 dispatch({type: 'FETCH_UNINVITED_ERROR', payload: err.response});
             });
     }

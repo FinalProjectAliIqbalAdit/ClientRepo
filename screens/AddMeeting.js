@@ -10,8 +10,9 @@ import {
 } from 'react-native';
 import axios from '../config/axios';
 import { connect } from 'react-redux';
-import { fetchUserMeetings } from "../store/meetingsAction";
-
+import { fetchUserMeetings,searchPlace,fetchMeetings } from "../store/meetingsAction";
+import db from '../config/firebase'
+import realAxios from 'axios'
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -101,36 +102,62 @@ class AddMeeting extends Component {
         title: '',
         description: '',
         place: '',
+        lat: '',
+        lng: '',
+        hideSuggestion: false,
         startAt: new Date()
     }
 
     handleInputChange = val => (e) => {
+        if (val == 'place') {
+          this.setState({
+            hideSuggestion: false
+          })
+          this.props.searchPlace(e)
+        }
         this.setState({
             [val]: e
         });
     }
 
-    addMeeting = (token) => {
-        axios.post(`/meetings`, {headers: {token: token}}, {
+    addMeeting = () => { 
+        axios.post(`/meetings`, {
             title: this.state.title,
             description: this.state.description,
+            lat: this.state.lat,
+            lng: this.state.lng,
             startAt: this.state.startAt
-        })
-            .then(({ data }) => {
-                console.log('data', data);
-                this.setState({
-                    title: '',
-                    description: '',
-                    place: '',
-                    startAt: new Date()
-                })
-                this.props.fetchUserMeetings(this.props.userId, this.props.token);
-                this.props.navigation.navigate('Meetings')
+        },{headers: {token: this.props.token}})
+            .then(() => {
+                realAxios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${Number(this.props.user.lat)},${Number(this.props.user.lng)}&destinations=${Number(this.state.lat)},${Number(this.state.lng)}&mode=driving&key=AIzaSyBa-c-SNhtue6ozeAQajtfmhhnYhrNlGMY`)
+                .then(({ data })=>{
+                  db.ref(`meetings/${this.state.title}/${this.props.user.name}`).set({
+                    _id : this.props.user._id,
+                    name : this.props.user.name,
+                    lat : this.props.user.lat,
+                    lng : this.props.user.lng,
+                    duration: data.rows[0].elements[0].duration.text,
+                    distance: data.rows[0].elements[0].distance.text
+                  })
+                  .then(()=>{
+                    this.setState({
+                      title: '',
+                      description: '',
+                      place: '',
+                      lat: '',
+                      lng: '',
+                      startAt: new Date()
+                    })
+                    this.props.fetchMeetings()
+                    this.props.navigation.navigate('Meetings')
+                  })
+                
             })
             .catch((err) => {
-                console.log('Create Meeting Error: ', err);
+                console.log('Create Meeting Error: ', err.response);
             });
-    }
+          })
+        }
     
     render() {
         return (
@@ -158,9 +185,26 @@ class AddMeeting extends Component {
                         placeholder="Place"
                         value={this.state.place}
                         underlineColorAndroid='transparent'
-                        onChangeText={this.handleInputChange('place')}/>
+                        onChangeText={this.handleInputChange('place')}/> 
                     <Image style={styles.inputIcon} source={{uri: 'https://img.icons8.com/color/48/000000/map-marker.png'}}/>
                 </View>
+                {!this.state.hideSuggestion && 
+                  <View>
+                    {this.props.searchResult.length !== 0 && this.props.searchResult.map(elem => 
+                      <TouchableOpacity key={elem.id} style={{width: 300}} onPress= {()=>{
+                        this.setState({
+                          lat: elem.geometry.location.lat,
+                          lng: elem.geometry.location.lng,
+                          place: elem.name,
+                          hideSuggestion: true
+                        })
+                      }}>
+                          <Text style={{color: 'black'}}>{elem.name}</Text>
+                          <TextInput style={{color: 'grey'}} editable = {false}>{elem.formatted_address}</TextInput>
+                      </TouchableOpacity>)} 
+                  </View>
+                }
+                 
 
                 <View style={styles.pickTimeContainer}>
                     <Text style={styles.textPickTime}>
@@ -187,13 +231,18 @@ class AddMeeting extends Component {
 const mapStateToProps = (state) => {
     return {
         token: state.login.user.token,
-        userId: state.login.user._id
+        userId: state.login.user._id,
+        searchLoading: state.meetings.searchLoading,
+        searchResult : state.meetings.searchResult,
+        user: state.login.user
     }
 }
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        fetchUserMeetings: (userId, token) => dispatch(fetchUserMeetings(userId, token))
+        fetchUserMeetings: (userId, token) => dispatch(fetchUserMeetings(userId, token)),
+        searchPlace: (str)=> dispatch(searchPlace(str)),
+        fetchMeetings: () => dispatch(fetchMeetings())
     }
 }
 
