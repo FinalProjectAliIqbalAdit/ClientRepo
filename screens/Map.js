@@ -1,24 +1,47 @@
 import React, { Component } from 'react';
-import { Platform,Text,View, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
+import { Platform,Text,View, ActivityIndicator, StyleSheet, TouchableOpacity, Modal, ScrollView, ListView , Image} from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import axios from '../config/axios'
 import realAxios from 'axios'
 import db from '../config/firebase'
 import { PermissionsAndroid } from 'react-native';
 import moment from 'moment'
+import { connect } from 'react-redux';
+import { fetchMeetings } from '../store/meetingsAction'
+
 
 class Map extends Component {
-    state = {
-        region: null,
-        location: null,
-        errorMessage: null,
-        mylatitude: -6.1754,
-        mylongitude: 106.8272,
-        latitudeDelta: 0.002,
-        longitudeDelta: 0.002,
-        error : null,
-        participants : {}
-    };
+
+    constructor(props) {
+        super(props);
+        const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+        this.state = {
+            dataSource: ds.cloneWithRows(props.navigation.state.params.meeting.participants),
+            lat: '',
+            lng: '',
+            populateLoading : true,
+            modalVisible : false,
+            region: null,
+            location: null,
+            errorMessage: null,
+            mylatitude: -6.1754,
+            mylongitude: 106.8272,
+            latitudeDelta: 0.002,
+            longitudeDelta: 0.002,
+            error : null,
+            participants : {}
+        };
+    }
+
+    pressHandler = () => {
+        this.toggleModal()
+    }
+
+    toggleModal = () => {
+        this.setState({
+            modalVisible : !this.state.modalVisible
+        })
+    }
 
     componentDidMount() {
         this.watchId = navigator.geolocation.watchPosition(
@@ -37,7 +60,57 @@ class Map extends Component {
         )
 
         this.WatchRealTimeDatabase()
-        
+
+        axios.get(`/meetings/${this.props.navigation.state.params.meeting._id}`)
+        .then(({data}) => {
+            this.setState({
+                dataSource : new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}).cloneWithRows(data.participants),
+                populateLoading : false
+            })
+        }).catch((err) => {
+            alert(JSON.stringify(err.response,null,2))
+        });
+    }
+
+    sendScoreFeedback = (score, participant) => {
+        axios.put(`/meetings/feedback/${this.props.navigation.state.params.meeting._id}`, {
+            meetingId : this.props.navigation.state.params.meeting._id,
+            participantId : participant._id,
+            feedbackScore : score
+        }, {
+            headers : {
+                token : this.props.token
+            }
+        })
+        .then(({data}) => {
+            console.log(data);
+            return db.ref(`meetings/${this.props.navigation.state.params.meeting.title}/${participant.name}`).remove()
+        })
+        .then(() => {
+            
+        }).catch((err) => {
+            alert(JSON.stringify(err,null,2))
+        });
+    }
+
+    closeMeeting = () => {
+        axios.put(`/meetings/${this.props.navigation.state.params.meeting._id}`, {
+            status : 'done'
+        }, {
+            headers : {
+                token : this.props.token
+            }
+        })
+        .then(() => {
+            return db.ref(`meetings/${this.props.navigation.state.params.meeting.title}`).remove()
+        })
+        .then(() => {
+            navigator.geolocation.clearWatch(this.watchId);
+            this.props.fetchMeetings()
+            this.props.navigation.navigate('List')
+        }).catch((err) => {
+            alert(JSON.stringify(err,null,2))
+        });
     }
 
     WatchRealTimeDatabase = () => {
@@ -45,6 +118,7 @@ class Map extends Component {
         db.ref(`meetings/${meeting.title}`).on('value',  (snapshot) => {
             if(!snapshot.exists() || !snapshot.child(`${this.props.navigation.state.params.user.name}`).exists()) {
                 navigator.geolocation.clearWatch(this.watchId);
+                this.props.fetchMeetings()
                 this.props.navigation.replace('List')
             } else {
                 this.setState({
@@ -106,8 +180,6 @@ class Map extends Component {
                     <Text style={{marginHorizontal: 10, fontWeight: '600' }}>
                         { moment(this.props.navigation.state.params.arr[0].departTime).format("dddd Do MMM YYYY") } {"\n"}
                         You should go at : { moment(this.props.navigation.state.params.arr[0].departTime).format("HH:mm A") }
-                        
-                        {/* { moment(new Date).format("dddd Do MMM YYYY HH:mm A") } */}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -144,8 +216,10 @@ class Map extends Component {
     }
 
     render() {
+        let scores = [20,40,60,80,100]
         if (!this.state.region) return (<ActivityIndicator></ActivityIndicator>)
         this.getDeviceCurrentPosition()
+        let isHost = this.props.navigation.state.params.meeting.host._id == this.props.user._id
         return (
             <View style={{...StyleSheet.absoluteFillObject,
                 justifyContent: 'space-between',
@@ -206,10 +280,76 @@ class Map extends Component {
                     alignItems: 'flex-start',
                     width: '100%',
                     paddingHorizontal: 10,
-                    marginBottom : 30,
+                    marginBottom : 20,
                 }}>
                     {this.showParticipants()}
+                    { isHost && <View style={{
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(255,255,255,1)',
+                        borderRadius: 20,
+                        height: 30,
+                        marginTop: 10,}}
+                    >
+                        <TouchableOpacity
+                            style={{margin: 30}}
+                            onPress={() => {
+                                this.toggleModal()
+                            }}>
+                            <Text style={{marginHorizontal: 10, fontWeight: '600' }}>
+                                Meeting Control
+                            </Text>
+                        </TouchableOpacity>
+                    </View>}
                 </View>
+
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={this.state.modalVisible}
+                    onRequestClose={() => {
+                        console.log('Modal has been closed.');
+                    }}
+                    >
+                    <View style={{ flex: 1 ,flexDirection: 'column', justifyContent: 'flex-end'}}>
+                        <View style={{ height: "100%" ,width: '100%', backgroundColor:"#fff" , alignItems: 'center'}}>
+                            <ScrollView style={styles.container}>
+                                <Text style={{fontSize : 22,marginLeft: 10, marginBottom:20, justifyContent: 'center', alignItems: 'center'}}> Send Feedback to Participants </Text>
+                                { this.state.populateLoading ? <ActivityIndicator></ActivityIndicator> : (<ListView 
+                                    enableEmptySections={true}
+                                    dataSource={this.state.dataSource}
+                                    renderRow={(participant) => {
+                                        return (
+                                            <View style={styles.box}>
+                                                <Image style={styles.image} source={{uri: "https://bootdey.com/img/Content/avatar/avatar1.png"}} />
+                                                <View style={styles.boxContent}>
+                                                    <Text style={styles.title}>{participant.name}</Text>
+                                                    {/* <Text style={styles.description}>Lorem ipsum dolor sit amet, elit consectetur</Text> */}
+                                                    <View style={styles.starContainer}>
+                                                        {scores.map((score,i) => {
+                                                            return (
+                                                                <TouchableOpacity key={i} onPress={() => this.sendScoreFeedback(score, participant)}>
+                                                                    <Image style={styles.star} source={{uri:"https://img.icons8.com/color/40/000000/star.png"}}/>
+                                                                </TouchableOpacity>
+                                                            )
+                                                        })}
+                                                    </View>
+                                                </View>
+                                            </View>
+                                        )
+                                    }}
+                                />)}
+                                <TouchableOpacity style={[styles.buttonContainer, {marginTop: 30}]} onPress={ () => this.closeMeeting()}>
+                                    <Text style={{color : 'white'}}>Close Meeting</Text>  
+                                </TouchableOpacity> 
+                                <TouchableOpacity style={[styles.buttonContainerBack, {marginTop: 30}]} onPress={ () => this.toggleModal()}>
+                                    <Text style={{color : 'white'}}>Back</Text>  
+                                </TouchableOpacity> 
+                            </ScrollView>
+                        </View>
+                    </View>
+                </Modal>
 
             </View>
         );
@@ -218,4 +358,97 @@ class Map extends Component {
     }
 }
 
-export default Map;
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        paddingVertical: 30,
+    },
+    nameView: {
+        width: 240,
+        padding: 10,
+        backgroundColor: '#435562'
+    },
+    image: {
+        width: 60,
+        height:60,
+    },
+    starContainer:{
+        justifyContent:'flex-start', 
+        marginHorizontal:5, 
+        flexDirection:'row', 
+        marginTop:1
+    },
+    star:{
+        width:40,
+        height:40,
+    },
+    box: {
+        padding:5,
+        marginTop:5,
+        marginBottom:5,
+        backgroundColor: 'white',
+        flexDirection: 'row',
+    },
+    boxContent: {
+        flex:1,
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        marginLeft:10,
+    },
+    title:{
+        fontSize:18,
+        color:"#151515",
+        marginLeft:10,
+    },
+    button: {
+        height:35,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius:10,
+        width:50,
+        marginRight:5,
+        marginTop:5,
+    },
+    buttonContainer: {
+        marginTop:10,
+        alignSelf : 'center',
+        height:45,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom:20,
+        width:250,
+        borderRadius:30,
+        backgroundColor: "#183133",
+    },
+    buttonContainerBack: {
+        marginTop:10,
+        alignSelf : 'center',
+        height:45,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom:20,
+        width:130,
+        borderRadius:30,
+        backgroundColor: "#f40059",
+    }
+});
+
+const mapStateToProps = (state) => {
+    return {
+        token: state.login.user.token,
+        user : state.login.user
+    }
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return  {
+        fetchMeetings : () => dispatch(fetchMeetings())
+    }
+}
+
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(Map);

@@ -11,27 +11,15 @@ class MeetingDetail extends Component {
 
     constructor(props) {
         super(props);
-        const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
         this.state = {
-            dataSource: ds.cloneWithRows(props.navigation.state.params.meeting.participants),
             lat: '',
             lng: '',
-            populateLoading : true,
         };
     } 
 
     componentDidMount() {
         this.props.fetchMeetingDetail(this.props.navigation.state.params.meeting._id)
         this.props.fetchUninvitedUsers(this.props.navigation.state.params.meeting._id, this.props.token);
-        axios.get(`/meetings/${this.props.navigation.state.params.meeting._id}`)
-        .then(({data}) => {
-            this.setState({
-                dataSource : new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}).cloneWithRows(data.participants),
-                populateLoading : false
-            })
-        }).catch((err) => {
-            alert(JSON.stringify(err.response,null,2))
-        });
     }
 
     inviteUser(userId, meetingId, token) {
@@ -62,58 +50,7 @@ class MeetingDetail extends Component {
         }
     }
 
-    sendScoreFeedback = (score, participant) => {
-        // update user score dan remove dari database firebase  
-
-        axios.put(`/meetings/feedback`, {
-            meetingId : this.props.navigation.state.params.meeting._id,
-            participantId : participant._id,
-            feedbackScore : score
-        })
-        .then(({data}) => {
-            return db.ref(`meetings/${this.props.navigation.state.params.meeting.title}/${participant.name}`).remove()
-        })
-        .then(() => {
-            
-        }).catch((err) => {
-            alert(JSON.stringify(err,null,2))
-        });
-    }
-
-    closeMeeting = () => {
-        axios.put(`/meetings/${this.props.navigation.state.params.meeting._id}`, {
-            status : 'done'
-        }, {
-            headers : {
-                token : this.props.token
-            }
-        })
-        .then(() => {
-            return db.ref(`meetings/${this.props.navigation.state.params.meeting.title}`).remove()
-        })
-        .then(() => {
-            this.props.navigation.navigate('List')
-        }).catch((err) => {
-            alert(JSON.stringify(err,null,2))
-        });
-    }
-
     render() {
-        let scores = [20,40,60,80,100]
-        
-        const startAt = new Date(this.props.meeting.startAt);
-        const date = new Date(this.props.meeting.startAt).toDateString();
-        let realHour = startAt.getHours();
-        let realMinute = startAt.getMinutes();
-
-        if (realHour < 10) {
-            realHour = '0' + realHour;
-        }
-
-        if (realMinute < 10) {
-            realMinute = '0' + realMinute;
-        }
-
         return (
             <ScrollView style={styles.container}>
                 {this.props.loading ? <View style={styles.indicator}>
@@ -170,36 +107,10 @@ class MeetingDetail extends Component {
                                 </View>)}
                             </View>
                         </View>
-                    </View>
-                }
-
-                { this.state.populateLoading ? <ActivityIndicator></ActivityIndicator> : (<ListView 
-                    enableEmptySections={true}
-                    dataSource={this.state.dataSource}
-                    renderRow={(participant) => {
-                        return (
-                            <View style={styles.box}>
-                                <Image style={styles.image} source={{uri: "https://bootdey.com/img/Content/avatar/avatar1.png"}} />
-                                <View style={styles.boxContent}>
-                                    <Text style={styles.title}>{participant.name}</Text>
-                                    {/* <Text style={styles.description}>Lorem ipsum dolor sit amet, elit consectetur</Text> */}
-                                    <View style={styles.starContainer}>
-                                        {scores.map((score,i) => {
-                                            return (
-                                                <TouchableOpacity key={i} onPress={() => this.sendScoreFeedback(score, participant)}>
-                                                    <Image style={styles.star} source={{uri:"https://img.icons8.com/color/40/000000/star.png"}}/>
-                                                </TouchableOpacity>
-                                            )
-                                        })}
-                                    </View>
-                                </View>
-                            </View>
-                        )
-                    }}
-                />)}
-                <TouchableOpacity style={[styles.buttonContainer, {marginTop: 30}]} onPress={ () => this.closeMeeting()}>
-                    <Text style={{color : 'white'}}>Close Meeting</Text>  
-                </TouchableOpacity> 
+                    </View>}
+                    <TouchableOpacity style={styles.topacity} onPress={() => this.inviteUser(user._id, this.props.navigation.state.params.meeting._id, this.props.token)}>
+                        <Text style={{fontSize: 30, padding: 10}}>+</Text>
+                    </TouchableOpacity>
             </ScrollView>
         );
     }
