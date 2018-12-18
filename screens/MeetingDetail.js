@@ -21,6 +21,7 @@ class MeetingDetail extends Component {
     } 
 
     componentDidMount() {
+        this.props.fetchMeetingDetail(this.props.navigation.state.params.meeting._id)
         this.props.fetchUninvitedUsers(this.props.navigation.state.params.meeting._id, this.props.token);
         axios.get(`/meetings/${this.props.navigation.state.params.meeting._id}`)
         .then(({data}) => {

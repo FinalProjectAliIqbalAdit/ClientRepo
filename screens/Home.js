@@ -26,8 +26,7 @@ class Home extends Component {
             ),
             headerTitleStyle: { color: 'white' },
             headerStyle: {
-                borderBottomWidth: 0,
-                marginTop: 8
+                borderBottomWidth: 0
             }
         };
     }
