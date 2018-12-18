@@ -76,14 +76,14 @@ class ProfileView extends Component {
     render() {
         const { user, token } = this.props
 
-        if(!user) return (<ActivityIndicator></ActivityIndicator>)
+        if(!user) return (<ActivityIndicator style={{marginTop:29}}></ActivityIndicator>)
         else if(this.state.loading) {
             this.fetchUser(user._id, token)
-            return (<ActivityIndicator></ActivityIndicator>)
+            return (<ActivityIndicator style={{marginTop:29}}></ActivityIndicator>)
         }
 
         return (
-            <View style={styles.container}>
+            <View style={{marginTop:29}}>
                 <View style={styles.header}>
                     <View style={styles.headerContent}>
                         <Image style={styles.avatar} source={{uri: 'https://bootdey.com/img/Content/avatar/avatar2.png'}}/>

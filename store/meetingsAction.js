@@ -2,7 +2,6 @@ import axios from '../config/axios'
 import realAxios from 'axios'
 import store from './store'
 export function fetchMeetings(payload) {
-    console.log('????',store.getState());
     return (dispatch) => {
 
         dispatch({type : 'FETCH_MEETINGS_CALL'})
@@ -11,9 +10,7 @@ export function fetchMeetings(payload) {
             .then((result) => {
                 let data = []
                 let loop = result.data
-                console.log('cari ini',store.getState().login.user._id);
                 for(var i = 0; i < loop.length; i++){
-                  console.log('woy ini participant',loop[i].participants);
                   let tmp = loop[i].participants.filter(elem => elem._id == store.getState().login.user._id)
                   if(tmp.length !== 0){
                     data.push(loop[i])
@@ -53,14 +50,12 @@ export function setMeetingsToDefault() {
 };
 
 export function searchPlace(str){
-    console.log(`search this ${str}`);
     return (dispatch) => {
       dispatch({type: 'SEARCH_PLACE_LOADING'});
       var arr = str.split(' ')
       var result = arr.join('%20')
       realAxios.get(`https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${result}&inputtype=textquery&fields=id,photos,formatted_address,geometry,name,opening_hours,rating&locationbias=circle:50000@-6.260679,106.781613&key=AIzaSyBa-c-SNhtue6ozeAQajtfmhhnYhrNlGMY`)
         .then(({ data })=>{
-          console.log(`hasil search ${str}==>`, data);
           dispatch({ type: 'SEARCH_PLACE_SUCCESS', payload: data.candidates })
         })
         .catch((err)=>{

@@ -20,7 +20,6 @@ export default function(email, password, props) {
             })
             .catch((error) => {
                 dispatch({type : 'LOGIN_ERROR' , payload : error.response.data.message})
-                console.log('=====error>',error);
                 console.log(error.response);
             });
 

@@ -1,3 +1,4 @@
+import React from 'react'
 import { createStackNavigator, createAppContainer,createMaterialTopTabNavigator } from 'react-navigation';
 import Home from '../screens/Home';
 // import MeetingDetail from '../screens/MeetingDetail';

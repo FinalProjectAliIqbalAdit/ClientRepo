@@ -13,7 +13,7 @@ const MeetingCard = (props) => {
             <View style={styles.firstContainer}>
                 <Text style={styles.title}>{props.meeting.title}</Text>
                 <TextInput style={styles.description} autoCapitalize="none" value={props.meeting.description} editable = {false} />
-                <Text style={{marginBottom: 5}}>Hosted by <Text style={{fontWeight: 'bold'}}>{props.meeting.host.name}</Text></Text>
+                <Text style={{marginBottom: 5}}>Hosted by <Text style={{fontWeight: 'bold'}}>{props.username}</Text></Text>
                 <Text style={{color: '#20b2aa', fontWeight: '500'}}>{moment(props.meeting.startAt).format("dddd Do MMM YYYY")}</Text>
             </View>
             <View style={styles.statusContainer}>
@@ -21,7 +21,7 @@ const MeetingCard = (props) => {
                     <TouchableOpacity onPress={() => props.showDetail(props.meeting.title, props.meeting)}>
                         <>
                             <View style={{borderRadius: 20, backgroundColor: '#3399ff', width: 90, alignItems: 'center', height: 30, justifyContent: 'center', marginBottom: 20}}>
-                                <Text style={{color: 'white', fontWeight: '600'}}>{props.meeting.status}</Text>
+                                <Text style={{color: 'white', fontWeight: '600'}}>Map</Text>
                             </View>
                             <Text style={{fontWeight: '900'}}>At {moment(props.meeting.startAt).format("HH:mm A")}</Text>
                         </>
@@ -29,7 +29,7 @@ const MeetingCard = (props) => {
                     <TouchableOpacity>
                         <>
                             <View style={{borderRadius: 50, backgroundColor: '#f40059', width: 90, alignItems: 'center', height: 30, justifyContent: 'center', marginBottom: 20}}>
-                                <Text style={{color: 'white', fontWeight: '600'}}>{props.meeting.status}</Text>
+                                <Text style={{color: 'white', fontWeight: '600'}}>Map</Text>
                             </View>
                             <Text style={{fontWeight: '900'}}>At {moment(props.meeting.startAt).format("HH:mm A")}</Text>
                         </>

@@ -82,9 +82,9 @@ class RegisterForm extends Component {
         return (
             <View style={styles.container}>
                 <Text style={{marginBottom: 20, alignSelf: 'center', fontWeight: '700', fontSize: 25}}>Create your account</Text>
-                <TextInput style={styles.textInput} value={this.state.name} placeholder="Name" onChangeText={this.handleInputChange('name')} />
-                <TextInput style={styles.textInput} value={this.state.email} placeholder="Email" onChangeText={this.handleInputChange('email')} />
-                <TextInput style={styles.textInput} secureTextEntry={true} value={this.state.password} placeholder="Password" onChangeText={this.handleInputChange('password')} />
+                <TextInput style={styles.textInput} value={this.state.name} placeholder="Name" onChangeText={this.handleInputChange('name')} autoCapitalize='none' />
+                <TextInput style={styles.textInput} value={this.state.email} placeholder="Email" onChangeText={this.handleInputChange('email')} autoCapitalize='none'/>
+                <TextInput style={styles.textInput} secureTextEntry={true} value={this.state.password} placeholder="Password" onChangeText={this.handleInputChange('password')} autoCapitalize='none'/>
                 <TouchableOpacity style={styles.topacity} onPress={() => {this.submitRegister()}}>
                     <Text style={{color: 'white', fontWeight: '500', fontSize: 15}}>Register</Text>
                 </TouchableOpacity>

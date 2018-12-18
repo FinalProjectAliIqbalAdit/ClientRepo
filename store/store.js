@@ -13,8 +13,6 @@ const rootReducers = combineReducers({
 })
 
 const logger = store => next => action => {
-    console.log('this is action --- ', action)
-    console.log('current dispatch --', store.getState() )
     next(action)
 }
 
