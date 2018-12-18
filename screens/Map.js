@@ -43,10 +43,14 @@ class Map extends Component {
     WatchRealTimeDatabase = () => {
         let meeting = this.props.navigation.state.params.meeting
         db.ref(`meetings/${meeting.title}`).on('value',  (snapshot) => {
-            // alert(JSON.stringify(snapshot.val(),null,2))
-            this.setState({
-                participants : snapshot.val()
-            })
+            if(!snapshot.exists() || !snapshot.child(`${this.props.navigation.state.params.user.name}`).exists()) {
+                navigator.geolocation.clearWatch(this.watchId);
+                this.props.navigation.replace('List')
+            } else {
+                this.setState({
+                    participants : snapshot.val()
+                })
+            }
         });
     }
 
