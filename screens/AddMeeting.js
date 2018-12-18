@@ -126,6 +126,7 @@ class AddMeeting extends Component {
             description: this.state.description,
             lat: this.state.lat,
             lng: this.state.lng,
+            place: this.state.place,
             startAt: this.state.startAt
         },{headers: {token: this.props.token}})
             .then(() => {
