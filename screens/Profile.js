@@ -37,18 +37,31 @@ class ProfileView extends Component {
     }
 
     acceptInvitation = (meetingObj) => {
-        axios.get(`/meetings/accept/${meetingObj._id}`, {
-            headers : {
-                token : this.props.token
-            }
-        })
-        .then((result) => {
-            this.fetchUser(this.props.user._id, this.props.token)
-            this.props.fetchMeetings()
-            this.asignToFirebasDatabase(meetingObj)
-        }).catch((err) => {
-            alert(JSON.stringify(err.response,null,2))            
-        });
+        navigator.geolocation.getCurrentPosition(
+              (position) => {
+                  axios.post(`/meetings/accept/${meetingObj._id}`,{
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                  }, {
+                      headers : {
+                          token : this.props.token
+                      }
+                  })
+                  .then((result) => {
+                      this.fetchUser(this.props.user._id, this.props.token)
+                      this.props.fetchMeetings()
+                      this.asignToFirebasDatabase(meetingObj)
+                  }).catch((err) => {
+                      alert(JSON.stringify(err,null,2))            
+                  });
+              },
+              (error) => {
+                  this.setState({error: error.message})
+                  // alert(JSON.stringify(error.message,null,2))
+              },
+              {enableHighAccuracy : false, timeout: 50000, maximumAge: 10000}
+          )
+        
     }
 
     asignToFirebasDatabase =  (meetingObj) => {
@@ -123,7 +136,7 @@ class ProfileView extends Component {
                         {this.state.user.meetingInvitation.map((meetingInvite,i) => {
                             return (
                                 <View  style={styles.box}>
-                                    <Text style={{padding : 15, fontSize: 18}} >{meetingInvite.title}</Text>
+                                    <Text style={{padding : 15, fontSize: 18}} >{meetingInvite.title.slice(0,18)}</Text>
                                     <TouchableOpacity onPress={() => this.acceptInvitation(meetingInvite) }>
                                         <View style={styles.iconContent2}>
                                             <Image style={styles.icon} source={{uri: "https://png.icons8.com/ok/androidL/30/ffffff"}}/>

@@ -51,6 +51,18 @@ class MeetingDetail extends Component {
     }
 
     render() {
+      const startAt = new Date(this.props.meeting.startAt);
+      const date = new Date(this.props.meeting.startAt).toDateString();
+      let realHour = startAt.getHours();
+      let realMinute = startAt.getMinutes();
+
+      if (realHour < 10) {
+        realHour = '0' + realHour;
+      }
+
+      if (realMinute < 10) {
+        realMinute = '0' + realMinute;
+      }
         return (
             <ScrollView style={styles.container}>
                 {this.props.loading ? <View style={styles.indicator}>
@@ -108,9 +120,6 @@ class MeetingDetail extends Component {
                             </View>
                         </View>
                     </View>}
-                    <TouchableOpacity style={styles.topacity} onPress={() => this.inviteUser(user._id, this.props.navigation.state.params.meeting._id, this.props.token)}>
-                        <Text style={{fontSize: 30, padding: 10}}>+</Text>
-                    </TouchableOpacity>
             </ScrollView>
         );
     }
