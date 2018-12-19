@@ -3,16 +3,22 @@ import {
     StyleSheet,
     Text,
     View,
+    ScrollView,
     TextInput,
     DatePickerIOS,
     TouchableOpacity,
-    Image
+    Image,
+    Platform,
+    DatePickerAndroid,
+    TimePickerAndroid
 } from 'react-native';
 import axios from '../config/axios';
 import { connect } from 'react-redux';
 import { fetchUserMeetings,searchPlace,fetchMeetings } from "../store/meetingsAction";
 import db from '../config/firebase'
 import realAxios from 'axios'
+import moment from 'moment'
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -38,6 +44,16 @@ const styles = StyleSheet.create({
         width: 300,
         height: 45,
         marginBottom: 20,
+        marginTop: 5,
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    pickTimeButton: {
+        backgroundColor: '#11a21a',
+        borderRadius: 10,
+        width: 100,
+        height: 45,
+        marginBottom: 5,
         marginTop: 5,
         flexDirection: 'row',
         alignItems: 'center'
@@ -105,7 +121,10 @@ class AddMeeting extends Component {
         lat: '',
         lng: '',
         hideSuggestion: false,
-        startAt: new Date()
+        startAt: new Date(),
+        chosenAndroidTime: '00:00',
+        androidDate: `${new Date().getUTCDate()}/${new Date().getUTCMonth() + 1}/${new Date().getUTCFullYear()}`,
+        value: 50,
     }
 
     handleInputChange = val => (e) => {
@@ -163,9 +182,46 @@ class AddMeeting extends Component {
           })
         }
     
+        setDate(newDate) {
+            this.setState({ chosenDate: newDate });
+        }
+          
+        setDateAndroid = async () => {
+            try {
+                const { action, year, month, day, } = await DatePickerAndroid.open({
+                    date: new Date(),
+                    minDate: new Date(),
+                });
+                if (action !== DatePickerAndroid.dismissedAction) {
+                    this.setState({ androidDate: `${day}/${month + 1}/${year}` });
+                }
+            } catch ({ code, message }) {
+                console.warn('Cannot open date picker', message);
+            }
+        };
+          
+        setTimeAndroid = async () => {
+            try {
+                const { action, hour, minute } = await TimePickerAndroid.open({
+                    hour: 14,
+                    minute: 0,
+                    is24Hour: false, // Will display '2 PM'
+                });
+                if (action !== TimePickerAndroid.dismissedAction) {
+                        // Selected hour (0-23), minute (0-59)
+                    const m = (minute < 10) ? `0${minute}` : minute;
+                    const h = (hour < 10) ? `0${hour}` : hour;
+                    this.setState({ chosenAndroidTime: `${h}:${m}` });
+                }
+            } catch ({ code, message }) {
+                 console.warn('Cannot open time picker', message);
+            }
+          };
+
     render() {
         return (
-            <View style={styles.container}>
+            <ScrollView >
+                <View style={styles.container}>
                 <View style={styles.inputContainer}>
                     <TextInput style={styles.inputs}
                         placeholder="Title"
@@ -218,16 +274,47 @@ class AddMeeting extends Component {
                 </View>
             
                 <View style={styles.dateContainer}>
-                    <DatePickerIOS
-                        date={this.state.startAt}
-                        onDateChange={this.handleInputChange('startAt')}
-                    />
+                    {Platform.OS == 'ios' ? 
+                        (<DatePickerIOS
+                            date={this.state.startAt}
+                            onDateChange={this.handleInputChange('startAt')}
+                        />) : 
+                        (<View style={{padding: 10, alignContent: 'center', justifyContent: 'center', alignItems: 'center'}}>
+                            <TouchableOpacity onPress={() => this.setDateAndroid()}>
+                                <View style={styles.pickTimeButton}>
+                                    <Text style={styles.textPickTime}>
+                                        Pick Date
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => this.setTimeAndroid()}>
+                                <View style={styles.pickTimeButton}>
+                                    <Text style={styles.textPickTime}>
+                                        Pick Time
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+                            <Text>
+                                { moment(this.state.androidDate+''+this.state.chosenAndroidTime, 'DD/MM/YYYY hh:mm').format("DD-MM-YYYY hh:mm A") }
+                            </Text>
+                            <TouchableOpacity onPress={() => this.setState({
+                                startAt : moment(this.state.androidDate+''+this.state.chosenAndroidTime, 'DD/MM/YYYY hh:mm')
+                            })}>
+                                <View style={styles.pickTimeButton}>
+                                    <Text style={styles.textPickTime}>
+                                        Confirm
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+                       
+                        </View>) }
                 </View>
     
-                <TouchableOpacity style={[styles.buttonContainer, styles.createButton]} onPress={()=> this.addMeeting()}>
+                <TouchableOpacity style={[styles.buttonContainer, styles.createButton, {marginBottom : 80}]} onPress={()=> this.addMeeting()}>
                     <Text style={styles.btnText}>Create Meeting</Text>
                 </TouchableOpacity>
-          </View>
+                </View>
+            </ScrollView>
         );
     }
 }
