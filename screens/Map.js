@@ -121,9 +121,12 @@ class Map extends Component {
                 this.props.fetchMeetings()
                 this.props.navigation.replace('List')
             } else {
-                this.setState({
-                    participants : snapshot.val()
-                })
+              let dataParticipants = Object.values(snapshot.val())
+              this.setState({
+                   participants : snapshot.val(),
+                   dataSource : new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}).cloneWithRows(dataParticipants),
+                   populateLoading : false
+               })
             }
         });
     }
@@ -283,7 +286,11 @@ class Map extends Component {
                     marginBottom : 20,
                 }}>
                     {this.showParticipants()}
-                    { isHost && <View style={{
+                    { isHost && <TouchableOpacity 
+                      onPress={()=>{
+                        this.toggleModal()
+                      }}
+                      style={{
                         flexDirection: 'column',
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -292,16 +299,10 @@ class Map extends Component {
                         height: 30,
                         marginTop: 10,}}
                     >
-                        <TouchableOpacity
-                            style={{margin: 30}}
-                            onPress={() => {
-                                this.toggleModal()
-                            }}>
-                            <Text style={{marginHorizontal: 10, fontWeight: '600' }}>
+                            <Text style={{marginHorizontal: 10, fontWeight: '600' }} >
                                 Meeting Control
                             </Text>
-                        </TouchableOpacity>
-                    </View>}
+                    </TouchableOpacity>}
                 </View>
 
                 <Modal

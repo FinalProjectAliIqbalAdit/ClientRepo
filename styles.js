@@ -142,6 +142,7 @@ export default styles = StyleSheet.create({
     meetingsIndicator: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        marginTop: 250
     }
 });
