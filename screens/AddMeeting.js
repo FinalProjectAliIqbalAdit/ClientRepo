@@ -3,6 +3,7 @@ import {
     StyleSheet,
     Text,
     View,
+    ScrollView,
     TextInput,
     DatePickerIOS,
     TouchableOpacity,
@@ -48,7 +49,7 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     pickTimeButton: {
-        backgroundColor: 'blue',
+        backgroundColor: '#11a21a',
         borderRadius: 10,
         width: 100,
         height: 45,
@@ -219,7 +220,8 @@ class AddMeeting extends Component {
 
     render() {
         return (
-            <View style={styles.container}>
+            <ScrollView >
+                <View style={styles.container}>
                 <View style={styles.inputContainer}>
                     <TextInput style={styles.inputs}
                         placeholder="Title"
@@ -308,10 +310,11 @@ class AddMeeting extends Component {
                         </View>) }
                 </View>
     
-                <TouchableOpacity style={[styles.buttonContainer, styles.createButton]} onPress={()=> this.addMeeting()}>
+                <TouchableOpacity style={[styles.buttonContainer, styles.createButton, {marginBottom : 80}]} onPress={()=> this.addMeeting()}>
                     <Text style={styles.btnText}>Create Meeting</Text>
                 </TouchableOpacity>
-          </View>
+                </View>
+            </ScrollView>
         );
     }
 }
