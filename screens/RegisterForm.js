@@ -66,16 +66,27 @@ class RegisterForm extends Component {
     }
 
     submitRegister = () => {
-        let { name, email, password } = this.state
-        axios.post('/register', {
-            name, email, password
-        })
-        .then((result) => {
-            alert('Register Success')
-            this.props.navigation.navigate('Auth')
-        }).catch((err) => {
-            alert(JSON.stringify(err.response.data.message,null,2))
-        });
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                let { name, email, password } = this.state
+                
+                axios.post('/register', {
+                    name, email, password, lat: position.coords.latitude, lng: position.coords.longitude
+                })
+                .then((result) => {
+                    // alert('Register Success')
+                    this.props.navigation.navigate('Auth')
+                }).catch((err) => {
+                    alert(JSON.stringify(err.response.data.message,null,2))
+                });
+            },
+            (error) => {
+                this.setState({error: error.message})
+                // alert(JSON.stringify(error.message,null,2))
+            },
+            {enableHighAccuracy : false, timeout: 50000, maximumAge: 10000}
+        )
+        
     }
 
     render() {

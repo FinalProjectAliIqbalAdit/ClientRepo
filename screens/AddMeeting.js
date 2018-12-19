@@ -131,9 +131,10 @@ class AddMeeting extends Component {
             startAt: this.state.startAt
         },{headers: {token: this.props.token}})
             .then(() => {
-                console.log('hrusnya kebuat');
+                console.log('hrusnya kebuat', this.props.user);
                 realAxios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${Number(this.props.user.lat)},${Number(this.props.user.lng)}&destinations=${Number(this.state.lat)},${Number(this.state.lng)}&mode=driving&key=AIzaSyBa-c-SNhtue6ozeAQajtfmhhnYhrNlGMY`)
                 .then(({ data })=>{
+                  console.log('data ===> hasil nembak', data);
                   db.ref(`meetings/${this.state.title}/${this.props.user.name}`).set({
                     _id : this.props.user._id,
                     name : this.props.user.name,
@@ -157,7 +158,7 @@ class AddMeeting extends Component {
                 
             })
             .catch((err) => {
-                console.log('Create Meeting Error: ', err.response);
+                console.log('Create Meeting Error: ', err);
             });
           })
         }
