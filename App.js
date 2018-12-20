@@ -17,7 +17,10 @@ console.disableYellowBox = true;
 
 const AppNavigator = createStackNavigator({
     Auth: {
-        screen: Authentication
+        screen: Authentication,
+        navigationOptions: () => ({
+            headerLeft: null
+        })
     },
     Register: {
         screen: RegisterForm
